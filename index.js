@@ -7,8 +7,20 @@ import studentRoutes from "./routes/studentRoutes.js";
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://student-management-one-chi.vercel.app",
+].filter(Boolean);
 
-app.use(cors());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 
 // Routes
