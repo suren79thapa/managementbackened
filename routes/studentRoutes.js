@@ -5,7 +5,7 @@ import { validateStudent } from "../middleware/validateStudent.js";
 const router = express.Router();
 
 /* =========================
-   ✅ GET all students (pagination + global stats)
+   GET all students (pagination + stats)
 ========================= */
 router.get("/", async (req, res) => {
   try {
@@ -13,21 +13,18 @@ router.get("/", async (req, res) => {
     const limit = parseInt(req.query.limit) || 6;
     const skip = (page - 1) * limit;
 
-    // Fetch total students
     const totalStudents = await Student.countDocuments();
-
-    // Fetch paginated students
     const students = await Student.find().skip(skip).limit(limit);
 
-    // ✅ Compute global stats for all students
     const allStudents = await Student.find({}, "course age");
     const totalCourses = new Set(allStudents.map((s) => s.course)).size;
     const averageAge =
       allStudents.length > 0
-        ? allStudents.reduce((sum, s) => sum + s.age, 0) / allStudents.length
-        : 0;
+        ? Math.round(
+            allStudents.reduce((sum, s) => sum + s.age, 0) / allStudents.length
+          )
+        : "-";
 
-    // ✅ Collect all courses for dropdown
     const allCourses = [...new Set(allStudents.map((s) => s.course))];
 
     res.json({
@@ -51,7 +48,7 @@ router.get("/", async (req, res) => {
 });
 
 /* =========================
-   ✅ GET student by ID
+   GET student by ID
 ========================= */
 router.get("/:id", async (req, res) => {
   try {
@@ -68,7 +65,7 @@ router.get("/:id", async (req, res) => {
 });
 
 /* =========================
-   ✅ POST add new student
+   POST add new student
 ========================= */
 router.post("/", validateStudent, async (req, res) => {
   try {
@@ -80,7 +77,7 @@ router.post("/", validateStudent, async (req, res) => {
 });
 
 /* =========================
-   ✅ PUT update student
+   PUT update student
 ========================= */
 router.put("/:id", validateStudent, async (req, res) => {
   try {
@@ -99,7 +96,7 @@ router.put("/:id", validateStudent, async (req, res) => {
 });
 
 /* =========================
-   ✅ DELETE student
+   DELETE student
 ========================= */
 router.delete("/:id", async (req, res) => {
   try {
